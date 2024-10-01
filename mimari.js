@@ -42,9 +42,10 @@ class Stack {
 }
 
 class Traps {
-    constructor(name, value, func) {
+    constructor(name, value, args, func) {
         this.name = name;
         this.value = value;
+        this.args = args;
         this.func = func;
     }
 }
@@ -149,54 +150,9 @@ var stack = new Stack();
 // Traps
 
 var traps = [
-    new Traps('TRAP', 0, function() {
-        console.log('Trap 0');
+    new Traps('TRAP', 0, new Array(5), function(args) {
+        console.log(args[0] + " " + args[1] + " " + args[2] + " " + args[3] + " " + args[4]);
     }),
-    new Traps('TRAP', 1, function() {
-        console.log('Trap 1');
-    }),
-    new Traps('TRAP', 2, function() {
-        console.log('Trap 2');
-    }),
-    new Traps('TRAP', 3, function() {
-        console.log('Trap 3');
-    }),
-    new Traps('TRAP', 4, function() {
-        console.log('Trap 4');
-    }),
-    new Traps('TRAP', 5, function() {
-        console.log('Trap 5');
-    }),
-    new Traps('TRAP', 6, function() {
-        console.log('Trap 6');
-    }),
-    new Traps('TRAP', 7, function() {
-        console.log('Trap 7');
-    }),
-    new Traps('TRAP', 8, function() {
-        console.log('Trap 8');
-    }),
-    new Traps('TRAP', 9, function() {
-        console.log('Trap 9');
-    }),
-    new Traps('TRAP', 10, function() {
-        console.log('Trap 10');
-    }),
-    new Traps('TRAP', 11, function() {
-        console.log('Trap 11');
-    }),
-    new Traps('TRAP', 12, function() {
-        console.log('Trap 12');
-    }),
-    new Traps('TRAP', 13, function() {
-        console.log('Trap 13');
-    }),
-    new Traps('TRAP', 14, function() {
-        console.log('Trap 14');
-    }),
-    new Traps('TRAP', 15, function() {
-        console.log('Trap 15');
-    })
 ];
 
 // The instructions to run
@@ -205,7 +161,7 @@ var instructions = [
     new Instruction(ADD, [0, 5]),
     new Instruction(ADD, [1, 6]),
     new Instruction(MOV, [0, 1]),
-    new Instruction(TRAP, [15]),
+    new Instruction(TRAP, [0, [5, 5, 255, 255, 255]]),
     new Instruction(HLT, []),
 ];
 
@@ -344,8 +300,9 @@ function execute(instruction) {
             break;
         case TRAP:
             var operand1 = instruction.operands[0];
-            console.log("TRAP " + operand1);
-            traps[operand1].func();
+            var operand2 = instruction.operands[1];
+            console.log("TRAP " + operand1 + " " + operand2);
+            traps[operand1].func(operand2);
             break;
     }
 
