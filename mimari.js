@@ -1,3 +1,7 @@
+// MimariJS main script file
+// Copyright (c) 2024 Erdem Ersoy (eersoy93)
+// Licensed with MIT License
+
 "use strict";
 
 // Class definitions
