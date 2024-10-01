@@ -151,7 +151,10 @@ var stack = new Stack();
 
 var traps = [
     new Traps('TRAP', 0, new Array(5), function(args) {
-        console.log(args[0] + " " + args[1] + " " + args[2] + " " + args[3] + " " + args[4]);
+        var screenCanvas = document.getElementById('screenCanvas');
+        var screenCanvasContext = screenCanvas.getContext('2d');
+        screenCanvasContext.fillStyle = 'rgb(' + args[2] + ', ' + args[3] + ', ' + args[4] + ')';
+        screenCanvasContext.fillRect(args[0], args[1], 1, 1);
     }),
 ];
 
