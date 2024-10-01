@@ -49,6 +49,12 @@ class Traps {
     }
 }
 
+class Program {
+    constructor(instructions) {
+        this.instructions = instructions;
+    }
+}
+
 class Machine {
     constructor(memory, registers, stack, traps, program) {
         this.memory = memory;
@@ -118,7 +124,7 @@ var memory = new Array(1 * 1024 ^ 3);
 // Registers
 
 var registers = [
-    new Register('R0', 0),
+    new Register('R0', 0),  // Accumulator
     new Register('R1', 0),
     new Register('R2', 0),
     new Register('R3', 0),
@@ -133,7 +139,7 @@ var registers = [
     new Register('R12', 0),
     new Register('R13', 0),
     new Register('R14', 0),
-    new Register('R15', 0)
+    new Register('R15', 0)   // Program counter
 ];
 
 // Stack
@@ -193,158 +199,187 @@ var traps = [
     })
 ];
 
-// Main loop
+// The instructions to run
 
-function main() {
-    // Fetch
-    var instruction = fetch();
-
-    // Decode
-    var decodedInstruction = decode(instruction);
-
-    // Execute
-    execute(decodedInstruction);
-}
-
-// Fetch
-
-function fetch() {
-    return memory[registers['R15'].value];
-}
-
-// Decode
-
-function decode(instruction) {
-    return instructions[instruction];
-}
+var instructions = [
+    new Instruction(ADD, [0, 5]),
+    new Instruction(ADD, [1, 6]),
+    new Instruction(MOV, [0, 1]),
+    new Instruction(TRAP, [15]),
+    new Instruction(HLT, []),
+];
 
 // Execute
 
-function execute(decodedInstruction) {
-    switch (decodedInstruction.opcode) {
+function execute(instruction) {
+    switch (instruction.opcode) {
         case ADD:
-            operand1 = registers[decodedInstruction.operands[0]];
-            operand2 = registers[decodedInstruction.operands[1]];
-            registers[decodedInstruction.operands[0]].value = operand1.value + operand2.value;
+            var operand1 = instruction.operands[0];
+            var operand2 = instruction.operands[1];
+            console.log("ADD " + operand1 + " " + operand2);
+            registers[operand1].value += operand2.value;
             break;
         case SUB:
-            operand1 = registers[decodedInstruction.operands[0]];
-            operand2 = registers[decodedInstruction.operands[1]];
-            registers[decodedInstruction.operands[0]].value = operand1.value - operand2.value;
+            var operand1 = instruction.operands[0];
+            var operand2 = instruction.operands[1];
+            console.log("SUB " + operand1 + " " + operand2);
+            registers[operand1].value -= operand2.value;
             break;
         case MUL:
-            operand1 = registers[decodedInstruction.operands[0]];
-            operand2 = registers[decodedInstruction.operands[1]];
-            registers[decodedInstruction.operands[0]].value = operand1.value * operand2.value;
+            var operand1 = instruction.operands[0];
+            var operand2 = instruction.operands[1];
+            console.log("MUL " + operand1 + " " + operand2);
+            registers[operand1].value *= operand2.value;
             break;
         case DIV:
-            operand1 = registers[decodedInstruction.operands[0]];
-            operand2 = registers[decodedInstruction.operands[1]];
-            registers[decodedInstruction.operands[0]].value = operand1.value / operand2.value;
+            var operand1 = instruction.operands[0];
+            var operand2 = instruction.operands[1];
+            console.log("DIV " + operand1 + " " + operand2);
+            registers[operand1].value /= operand2.value;
             break;
         case MOV:
-            operand1 = registers[decodedInstruction.operands[0]];
-            operand2 = registers[decodedInstruction.operands[1]];
-            registers[decodedInstruction.operands[0]].value = operand2.value;
+            var operand1 = instruction.operands[0];
+            var operand2 = instruction.operands[1];
+            console.log("MOV " + operand1 + " " + operand2);
+            registers[operand1].value = operand2.value;
             break;
         case JMP:
-            operand1 = registers[decodedInstruction.operands[0]];
-            registers['R15'].value = operand1.value;
+            var operand1 = instruction.operands[0];
+            console.log("JMP " + operand1.value);
+            registers[15].value = operand1.value;
             break;
         case JZ:
-            operand1 = registers[decodedInstruction.operands[0]];
-            if (registers['R0'].value == 0) {
-                registers['R15'].value = operand1.value;
+            var operand1 = instruction.operands[0];
+            console.log("JZ " + operand1);
+            if (registers[0].value == 0) {
+                registers[15].value = operand1;
             }
             break;
         case JNZ:
-            operand1 = registers[decodedInstruction.operands[0]];
-            if (registers['R0'].value != 0) {
-                registers['R15'].value = operand1.value;
+            var operand1 = instruction.operands[0];
+            console.log("JNZ " + operand1);
+            if (registers[0].value != 0) {
+                registers[15].value = operand1;
             }
             break;
         case JE:
-            operand1 = registers[decodedInstruction.operands[0]];
-            if (registers['R0'].value == registers['R1'].value) {
-                registers['R15'].value = operand1.value;
+            var operand1 = instruction.operands[0];
+            console.log("JE " + operand1);
+            if (registers[0].value == registers['R1'].value) {
+                registers[16].value = operand1;
             }
             break;
         case JNE:
-            operand1 = registers[decodedInstruction.operands[0]];
-            if (registers['R0'].value != registers['R1'].value) {
-                registers['R15'].value = operand1.value;
+            var operand1 = instruction.operands[0];
+            console.log("JNE " + operand1);
+            if (registers[0].value != registers['R1'].value) {
+                registers[15].value = operand1;
             }
             break;
         case JL:
-            operand1 = registers[decodedInstruction.operands[0]];
-            if (registers['R0'].value < registers['R1'].value) {
-                registers['R15'].value = operand1.value;
+            var operand1 = instruction.operands[0];
+            console.log("JL " + operand1);
+            if (registers[0].value < registers['R1'].value) {
+                registers[15].value = operand1;
             }
             break;
         case JLE:
-            operand1 = registers[decodedInstruction.operands[0]];
-            if (registers['R0'].value <= registers['R1'].value) {
-                registers['R15'].value = operand1.value;
+            var operand1 = instruction.operands[0];
+            console.log("JLE " + operand1);
+            if (registers[0].value <= registers['R1'].value) {
+                registers[15].value = operand1;
             }
             break;
         case JG:
-            operand1 = registers[decodedInstruction.operands[0]];
-            if (registers['R0'].value > registers['R1'].value) {
-                registers['R15'].value = operand1.value;
+            var operand1 = instruction.operands[0];
+            console.log("JG " + operand1);
+            if (registers[0].value > registers['R1'].value) {
+                registers[15].value = operand1;
             }
             break;
         case JGE:
-            operand1 = registers[decodedInstruction.operands[0]];
-            if (registers['R0'].value >= registers['R1'].value) {
-                registers['R15'].value = operand1.value;
+            var operand1 = instruction.operands[0];
+            console.log("JGE " + operand1);
+            if (registers[0].value >= registers['R1'].value) {
+                registers[15].value = operand1;
             }
             break;
         case CMP:
-            operand1 = registers[decodedInstruction.operands[0]];
-            operand2 = registers[decodedInstruction.operands[1]];
-            if (operand1.value == operand2.value) {
-                registers['R0'].value = 0;
-            } else if (operand1.value < operand2.value) {
-                registers['R0'].value = -1;
+            var operand1 = instruction.operands[0];
+            var operand2 = instruction.operands[1];
+            console.log("CMP " + operand1 + " " + operand2);
+            if (operand1 == operand2) {
+                registers[0].value = 0;
+            } else if (operand1 < operand2) {
+                registers[0].value = -1;
             } else {
-                registers['R0'].value = 1;
+                registers[0].value = 1;
             }
             break;
         case PUSH:
-            operand1 = registers[decodedInstruction.operands[0]];
-            stack.push(operand1.value);
+            var operand1 = instruction.operands[0];
+            console.log("PUSH " + operand1);
+            stack.push(operand1);
             break;
         case POP:
-            operand1 = registers[decodedInstruction.operands[0]];
-            operand1.value = stack.pop
+            var operand1 = instruction.operands[0];
+            console.log("POP " + operand1);
+            operand1 = stack.pop
             break;
         case CALL:
-            operand1 = registers[decodedInstruction.operands[0]];
-            stack.push(registers['R15'].value);
-            registers['R15'].value = operand1.value;
+            var operand1 = instruction.operands[0];
+            console.log("CALL " + operand1);
+            stack.push(registers[16].value);
+            registers[15].value = operand1;
             break;
         case RET:
-            registers['R15'].value = stack.pop();
+            console.log("RET");
+            registers[15].value = stack.pop();
             break;
         case HLT:
-            console.log('System halted!');
+            console.log("HLT");
             break;
         case NOP:
+            console.log("NOP");
             break;
         case TRAP:
-            operand1 = registers[decodedInstruction.operands[0]];
-            traps[operand1.value].func();
+            var operand1 = instruction.operands[0];
+            console.log("TRAP " + operand1);
+            traps[operand1].func();
             break;
+    }
+
+    registers[15].value++;
+}
+
+// Main procedure
+
+function main(machine) {
+    while (true) {
+        if (machine.program.instructions[machine.registers[15].value].opcode == HLT) {
+            console.log("Machine halted!");
+            break;
+        }
+
+        execute(machine.program.instructions[machine.registers[15].value]);
     }
 }
 
-// Load the program
+// Initialize a new program
 
-var program = new Array();
+var program = new Program(instructions);
+
+// Load the program to memory
+
+for (var i = 0; i < program.instructions.length; i++) {
+    memory[i] = program.instructions[i].opcode.code;
+}
 
 // Initialize the machine
 
 var machine = new Machine(memory, registers, stack, traps, program);
+
+// Initialize the screen
 
 var screenCanvas = document.getElementById('screenCanvas');
 var screenCanvasContext = screenCanvas.getContext('2d');
@@ -353,4 +388,4 @@ screenCanvasContext.fillRect(0, 0, screenCanvas.width, screenCanvas.height);
 
 // Run the machine
 
-main();
+main(machine);
