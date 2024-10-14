@@ -320,12 +320,12 @@ function execute(instruction) {
 
 function main(machine) {
     while (true) {
+        execute(machine.program.instructions[machine.registers[15].value]);
+
         if (machine.program.instructions[machine.registers[15].value].opcode == HLT) {
-            console.log("Machine halted!");
+            alert("Machine halted!");
             break;
         }
-
-        execute(machine.program.instructions[machine.registers[15].value]);
     }
 }
 
